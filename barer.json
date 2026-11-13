@@ -4,5 +4,5 @@
   { "namn": "Exempelbar 3", "adress": "Exempelgatan 3, Stockholm" },
   { "namn": "Exempelbar 4", "adress": "Exempelgatan 4, Stockholm" },
   { "namn": "Exempelbar med ett längre namn", "adress": "Exempelgatan 5, Stockholm" },
-  { "namn": "Exempelbar 6", "adress": "Exempelgatan 6, Stockholm" }
+  { "namn": "Exempelbar 6", "adress": "Exempelgatan 6, Stockholm", "sist": true }
 ]

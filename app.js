@@ -4,8 +4,10 @@
 
   const KEY_VISITED = 'slumpad-barrunda:besokta';
   const KEY_CURRENT = 'slumpad-barrunda:aktuell';
-  const KEY_PREVIOUS = 'slumpad-barrunda:forra'; // the state before the last pick, for "Ångra"
-  const KEY_LOCKED = 'slumpad-barrunda:last'; // the bar an undo took back: the next roll must give it again
+  const KEY_HISTORY = 'slumpad-barrunda:historik'; // stack of { visited, current } before each pick, for "Ångra"
+  const KEY_QUEUE = 'slumpad-barrunda:ko'; // bars taken back by "Ångra": the next rolls replay them in order
+  const OLD_KEYS = ['slumpad-barrunda:forra', 'slumpad-barrunda:last']; // single-step undo, replaced
+  const MAX_HISTORY = 200;
 
   const app = document.querySelector('[data-app]');
   if (!app) return;
@@ -17,6 +19,7 @@
     views: app.querySelectorAll('[data-view]'),
     name: $('[data-name]'),
     address: $('[data-address]'),
+    final: $('[data-final]'),
     map: $('[data-map]'),
     progress: $('[data-progress]'),
     stops: app.querySelectorAll('[data-stop]'),
@@ -33,8 +36,8 @@
   let bars = [];
   let visited = [];
   let current = null;
-  let previous = null; // { visited, current } before the last pick, or null when there is nothing to undo
-  let locked = null; // name of the bar taken back by "Ångra"; undo + roll again can't be used to re-pick
+  let history = []; // { visited, current } before each pick, newest last; "Ångra" pops one
+  let queue = []; // bars taken back by "Ångra", next first; undo + roll again replays them, so undo can't be used to re-pick
   let busy = false;
 
   /* ---------- storage: never throws, works in memory if blocked ---------- */
@@ -62,29 +65,34 @@
     const cur = store.read(KEY_CURRENT);
     current = cur && names.has(cur) ? cur : null;
 
-    previous = null;
+    const known = (n) => typeof n === 'string' && names.has(n);
+    history = [];
     try {
-      const p = JSON.parse(store.read(KEY_PREVIOUS) || 'null');
-      if (p && Array.isArray(p.visited)) {
-        previous = {
-          visited: [...new Set(p.visited.filter((n) => typeof n === 'string' && names.has(n)))],
-          current: typeof p.current === 'string' && names.has(p.current) ? p.current : null,
-        };
+      const h = JSON.parse(store.read(KEY_HISTORY) || '[]');
+      if (Array.isArray(h)) {
+        history = h
+          .filter((s) => s && Array.isArray(s.visited))
+          .map((s) => ({ visited: [...new Set(s.visited.filter(known))], current: known(s.current) ? s.current : null }))
+          .slice(-MAX_HISTORY);
       }
-    } catch { previous = null; }
+    } catch { history = []; }
 
-    const lock = store.read(KEY_LOCKED);
-    locked = lock && names.has(lock) ? lock : null;
+    queue = [];
+    try {
+      const q = JSON.parse(store.read(KEY_QUEUE) || '[]');
+      if (Array.isArray(q)) queue = q.filter(known);
+    } catch { queue = []; }
   }
 
   function saveHistory() {
     store.write(KEY_VISITED, JSON.stringify(visited));
     if (current) store.write(KEY_CURRENT, current);
     else store.remove(KEY_CURRENT);
-    if (previous) store.write(KEY_PREVIOUS, JSON.stringify(previous));
-    else store.remove(KEY_PREVIOUS);
-    if (locked) store.write(KEY_LOCKED, locked);
-    else store.remove(KEY_LOCKED);
+    if (history.length) store.write(KEY_HISTORY, JSON.stringify(history));
+    else store.remove(KEY_HISTORY);
+    if (queue.length) store.write(KEY_QUEUE, JSON.stringify(queue));
+    else store.remove(KEY_QUEUE);
+    OLD_KEYS.forEach((k) => store.remove(k));
   }
 
   /* ---------- the list ---------- */
@@ -92,6 +100,7 @@
     if (!Array.isArray(data)) return [];
     const seen = new Set();
     const out = [];
+    let hasFinal = false;
     for (const item of data) {
       if (!item || typeof item.namn !== 'string') continue;
       const namn = item.namn.trim();
@@ -99,7 +108,10 @@
       seen.add(namn);
       const adress = typeof item.adress === 'string' ? item.adress.trim() : '';
       const karta = typeof item.karta === 'string' && /^https?:\/\//i.test(item.karta.trim()) ? item.karta.trim() : '';
-      out.push({ namn, adress, karta });
+      // "sist": true marks the shared last bar of the night; only the first one marked counts.
+      const sist = item.sist === true && !hasFinal;
+      if (sist) hasFinal = true;
+      out.push({ namn, adress, karta, sist });
     }
     return out;
   }
@@ -126,16 +138,24 @@
   }
 
   function pickNext() {
-    previous = { visited: visited.slice(), current };
+    history.push({ visited: visited.slice(), current });
+    if (history.length > MAX_HISTORY) history.shift();
     let pool = bars.filter((b) => !visited.includes(b.namn));
     if (pool.length === 0) {
       // Every bar visited: start a new round silently, but never repeat the bar just shown.
       visited = [];
       pool = bars.length > 1 ? bars.filter((b) => b.namn !== current) : bars.slice();
     }
-    // After an undo, the roll gives back the same bar, so undoing can't be used to shop for a bar.
-    const bar = (locked && pool.find((b) => b.namn === locked)) || pool[randomInt(pool.length)];
-    locked = null;
+    // The bar marked "sist" waits until every other bar of the round is visited, so the night ends there for everyone.
+    const others = pool.filter((b) => !b.sist);
+    if (others.length) pool = others;
+    // After an undo, rolls replay the bars that were taken back, in order, so undoing can't be used to shop for a bar.
+    let bar = null;
+    while (!bar && queue.length) {
+      const name = queue.shift();
+      bar = pool.find((b) => b.namn === name) || null;
+    }
+    if (!bar) bar = pool[randomInt(pool.length)];
     visited.push(bar.namn);
     current = bar.namn;
     saveHistory();
@@ -149,7 +169,7 @@
     const ready = (state === 'empty' || state === 'full') && !busy;
     el.next.disabled = !ready;
     el.reset.disabled = !ready || visited.length === 0;
-    if (el.undo) el.undo.disabled = !ready || !previous;
+    if (el.undo) el.undo.disabled = !ready || history.length === 0;
   }
 
   function sizeFor(name) {
@@ -186,6 +206,7 @@
     setName(bar.namn);
     el.address.textContent = bar.adress;
     el.address.hidden = !bar.adress;
+    if (el.final) el.final.hidden = !bar.sist;
     el.map.href = mapUrl(bar);
     el.map.setAttribute('aria-label', `Visa ${bar.namn} på karta (öppnas i ny flik)`);
     renderProgress();
@@ -194,7 +215,7 @@
 
   function land(bar) {
     renderBar(bar);
-    el.status.textContent = `Nästa bar: ${bar.namn}${bar.adress ? ', ' + bar.adress : ''}.`;
+    el.status.textContent = `Nästa bar: ${bar.namn}${bar.adress ? ', ' + bar.adress : ''}.${bar.sist ? ' Kvällens sista bar!' : ''}`;
     app.classList.remove('is-landed', 'is-rewound');
     void app.offsetWidth; // restart the landing animation
     app.classList.add('is-landed');
@@ -235,11 +256,11 @@
 
   // Take back the last pick (e.g. an accidental double tap): the bar returns to the unvisited pool.
   function onUndo() {
-    if (busy || !previous) return;
-    locked = current; // the bar being taken back comes up again on the next roll
-    visited = previous.visited;
-    current = previous.current;
-    previous = null;
+    if (busy || history.length === 0) return;
+    if (current) queue.unshift(current); // the bar being taken back comes up again on the next roll
+    const snapshot = history.pop();
+    visited = snapshot.visited;
+    current = snapshot.current;
     saveHistory();
     const bar = current && byName(current);
 
@@ -284,7 +305,7 @@
     if (!window.confirm('Vill du börja om? Alla besökta barer glöms bort.')) return;
     visited = [];
     current = null;
-    previous = null;
+    history = []; // the replay queue stays, so "Börja om" can't be used to re-pick either
     saveHistory();
     renderProgress();
     el.status.textContent = 'Historiken är rensad.';

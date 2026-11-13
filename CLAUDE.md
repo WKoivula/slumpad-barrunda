@@ -6,12 +6,16 @@
 - A bar is **never repeated until every bar has been visited**. After that, the history resets silently and randomizing carries on. The bar just shown is excluded from the first pick after the reset, so it can't come up twice in a row.
 - Each phone randomizes **independently**. There is no server, no sync and no shared state between users.
 - A small **"Börja om"** button clears the history, after a confirmation dialog.
-- A small **"Ångra"** button takes back the last pick, for an accidental double tap. It restores the previous bar and visited list, and the undone bar goes back into the unvisited pool.
-  - It's one step only, disabled until the next pick, and disabled during the roll.
-  - It survives a reload, and it works across the silent new-round reset.
-  - **Undo can't be used to pick a bar.** The bar that was taken back is *locked*, so the next roll gives that same bar again (the roll still animates as normal).
-    - The lock survives reloads and "Börja om", and is used up by that one roll.
-    - Undo + roll again, any number of times, always lands on the same bar.
+- **A shared last bar.** The bar marked `"sist": true` in `barer.json` is held back until every other bar of the round has been visited, so everyone's crawl ends there.
+  - When it comes up, the coaster shows a "Kvällens sista bar!" tag.
+  - After it, the silent new round starts as usual, and the marked bar is again held back until the end.
+- A small **"Ångra"** button takes back picks, for accidental taps. It's **multi-step**: each press undoes one more pick, all the way back to the start of the night ("Var börjar kvällen?").
+  - Each undo restores the previous bar and visited list.
+  - It's disabled when there's nothing to undo, and during the roll.
+  - It survives a reload, and works across the silent new-round reset.
+  - "Börja om" clears the undo history.
+  - **Undo can't be used to pick a bar.** Every undone bar goes onto a *replay queue*, newest first. The next rolls take bars from that queue, so undoing N times and rolling N times replays exactly the same bars in the same order. The roll still animates as normal.
+    - The queue survives reloads and "Börja om".
     - Only clearing the browser's site data gets around it, which no static site can prevent.
   - **Rewind effect:** about 0.35s with the `is-rewinding` class.
     - The coaster spins backwards, twice as fast as the roll, under scrambled letters, and the beer bubbles sink.
@@ -37,6 +41,7 @@
 ## The bar list (`barer.json`)
 - A JSON array. Each entry is `{ "namn": "Barens namn", "adress": "Gatan 1, Stad" }`.
 - Optional `"karta": "https://..."` overrides the generated Google Maps link (use it when a name search finds the wrong place).
+- Optional `"sist": true` marks **the shared last bar** of the night. Only the first bar marked counts. Remove the field (or set it to `false`) if the crawl should have no fixed ending.
 - `namn` is required and must be **unique**: it's the key stored in each visitor's history. Renaming a bar makes it count as a new, unvisited bar. Removed bars are ignored in old histories.
 - The list is fetched with `cache: "no-cache"`, so edits show up on the next page load after Pages redeploys (usually within a minute or two).
 - Keep the JSON valid: double quotes, commas between entries, no trailing comma. If the file fails to parse, the site shows its error state.
@@ -44,8 +49,9 @@
 ## Storage keys
 - `slumpad-barrunda:besokta`: a JSON array of visited bar names for the current round.
 - `slumpad-barrunda:aktuell`: the name of the bar currently shown, so a reload keeps it on screen.
-- `slumpad-barrunda:forra`: `{ visited, current }` from just before the last pick, used by "Ångra". It's removed after an undo or a reset.
-- `slumpad-barrunda:last`: the name of the bar an undo took back. The next roll must return it. It's removed once that roll uses it.
+- `slumpad-barrunda:historik`: a stack of `{ visited, current }`, one entry from just before each pick, newest last, capped at 200. "Ångra" pops from it; "Börja om" clears it.
+- `slumpad-barrunda:ko`: the replay queue, a JSON array of bar names that undos took back, next first. Each roll takes from its front.
+- The old single-step keys `slumpad-barrunda:forra` and `slumpad-barrunda:last` are deleted on every save.
 
 ## Screen states
 - Every state must exist and stay in Swedish:

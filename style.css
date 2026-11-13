@@ -2,7 +2,7 @@
  * nav: top bar, wordmark and the visited count · signature: a cream beer coaster on a confetti-strewn raspberry table that spins under anonymous letters, settles on the bar and throws confetti with a "Skål!"; the next-bar button is a foam-topped beer that bubbles while it rolls · states: loading, empty, error, full · darkroom: custom colourway "fest" (raspberry ground, cream coaster, berry ink, beer-amber button, five confetti inks; the user asked for party colours, a beer theme and party effects)
  * axes: mid/display-condensed/chromatic-amber · posture: full-palette · contrast: pass · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H5 E4 S5 R3 V5 · weakest: R, the user asked for a party, so restraint is spent on purpose; the confetti lives only in the background dots and the one-second burst, and the coaster keeps all the type */
-/* Hallmark · dismissed 40 · the coaster is berry 27% on cream 95% after the colourway block overrides tokens.css; the static pass read the dark Darkroom paper-2 */
+/* Hallmark · dismissed 40 · the coaster is berry 27% on cream 95%, and the last-bar tag is cream 95% on pink 46% (about 6:1), after the colourway block overrides tokens.css; the static pass read the dark Darkroom paper-2 */
 /* Hallmark · waive 39b · one 64px button, the only action on this screen · pressed one-handed in a dark bar, so the next-bar button gets the thumb-sized target */
 @import url("./tokens.css");
 @import url("./base.css");
@@ -15,6 +15,7 @@
   --color-rule: oklch(52% 0.17 355);
   --color-coaster-ink: oklch(27% 0.1 355); --color-coaster-muted: oklch(42% 0.11 355); --color-coaster-ring: oklch(62% 0.21 355);
   --color-shadow: oklch(25% 0.12 355);
+  --color-final: oklch(46% 0.19 355);
   --color-accent: oklch(78% 0.16 72); --color-accent-deep: oklch(71% 0.16 64); --color-accent-ink: oklch(27% 0.07 50);
   --color-foam: oklch(97% 0.02 90); --color-beer-shadow: oklch(42% 0.11 52);
   --color-focus: oklch(90% 0.16 100);
@@ -120,13 +121,23 @@
 .coaster__name[data-size="s"] { font-size: min(10cqi, 2.75rem); overflow-wrap: anywhere; }
 .coaster__title { font-size: min(12cqi, 3.25rem); }
 .coaster__text { font-size: var(--text-md); line-height: 1.45; color: var(--color-coaster-muted); max-width: 28ch; }
+/* the shared last bar of the night ("sist": true in barer.json) */
+.coaster__final {
+  padding: var(--space-2xs) var(--space-sm);
+  background: var(--color-final);
+  color: var(--color-paper-2);
+  font-size: var(--text-md);
+  line-height: 1.3;
+}
 
 /* the roll: the face spins under anonymous letters */
 .is-shuffling .coaster__face { animation: spin 520ms linear infinite; }
 .is-shuffling [data-address],
 .is-shuffling [data-map],
 .is-rewinding [data-address],
-.is-rewinding [data-map] { visibility: hidden; }
+.is-rewinding [data-map],
+.is-shuffling [data-final],
+.is-rewinding [data-final] { visibility: hidden; }
 /* the landing: it settles with a wobble */
 .is-landed .coaster__face { animation: settle 640ms var(--ease-out) both; }
 @keyframes spin { to { transform: rotate(360deg); } }
