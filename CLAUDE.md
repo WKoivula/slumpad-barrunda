@@ -9,6 +9,10 @@
 - A small **"Ångra"** button takes back the last pick, for an accidental double tap. It restores the previous bar and visited list, and the undone bar goes back into the unvisited pool.
   - It's one step only, disabled until the next pick, and disabled during the roll.
   - It survives a reload, and it works across the silent new-round reset.
+  - **Undo can't be used to pick a bar.** The bar that was taken back is *locked*, so the next roll gives that same bar again (the roll still animates as normal).
+    - The lock survives reloads and "Börja om", and is used up by that one roll.
+    - Undo + roll again, any number of times, always lands on the same bar.
+    - Only clearing the browser's site data gets around it, which no static site can prevent.
   - **Rewind effect:** about 0.35s with the `is-rewinding` class.
     - The coaster spins backwards, twice as fast as the roll, under scrambled letters, and the beer bubbles sink.
     - It then settles on the old bar with a mirrored wobble (`is-rewound`). `fest.js` pops a mint **"◀◀ Ångrat"** badge; the ◀◀ is a CSS clip-path, not an emoji.
@@ -41,6 +45,7 @@
 - `slumpad-barrunda:besokta`: a JSON array of visited bar names for the current round.
 - `slumpad-barrunda:aktuell`: the name of the bar currently shown, so a reload keeps it on screen.
 - `slumpad-barrunda:forra`: `{ visited, current }` from just before the last pick, used by "Ångra". It's removed after an undo or a reset.
+- `slumpad-barrunda:last`: the name of the bar an undo took back. The next roll must return it. It's removed once that roll uses it.
 
 ## Screen states
 - Every state must exist and stay in Swedish:

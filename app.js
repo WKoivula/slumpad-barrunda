@@ -5,6 +5,7 @@
   const KEY_VISITED = 'slumpad-barrunda:besokta';
   const KEY_CURRENT = 'slumpad-barrunda:aktuell';
   const KEY_PREVIOUS = 'slumpad-barrunda:forra'; // the state before the last pick, for "Ångra"
+  const KEY_LOCKED = 'slumpad-barrunda:last'; // the bar an undo took back: the next roll must give it again
 
   const app = document.querySelector('[data-app]');
   if (!app) return;
@@ -33,6 +34,7 @@
   let visited = [];
   let current = null;
   let previous = null; // { visited, current } before the last pick, or null when there is nothing to undo
+  let locked = null; // name of the bar taken back by "Ångra"; undo + roll again can't be used to re-pick
   let busy = false;
 
   /* ---------- storage: never throws, works in memory if blocked ---------- */
@@ -70,6 +72,9 @@
         };
       }
     } catch { previous = null; }
+
+    const lock = store.read(KEY_LOCKED);
+    locked = lock && names.has(lock) ? lock : null;
   }
 
   function saveHistory() {
@@ -78,6 +83,8 @@
     else store.remove(KEY_CURRENT);
     if (previous) store.write(KEY_PREVIOUS, JSON.stringify(previous));
     else store.remove(KEY_PREVIOUS);
+    if (locked) store.write(KEY_LOCKED, locked);
+    else store.remove(KEY_LOCKED);
   }
 
   /* ---------- the list ---------- */
@@ -126,7 +133,9 @@
       visited = [];
       pool = bars.length > 1 ? bars.filter((b) => b.namn !== current) : bars.slice();
     }
-    const bar = pool[randomInt(pool.length)];
+    // After an undo, the roll gives back the same bar, so undoing can't be used to shop for a bar.
+    const bar = (locked && pool.find((b) => b.namn === locked)) || pool[randomInt(pool.length)];
+    locked = null;
     visited.push(bar.namn);
     current = bar.namn;
     saveHistory();
@@ -227,6 +236,7 @@
   // Take back the last pick (e.g. an accidental double tap): the bar returns to the unvisited pool.
   function onUndo() {
     if (busy || !previous) return;
+    locked = current; // the bar being taken back comes up again on the next roll
     visited = previous.visited;
     current = previous.current;
     previous = null;
