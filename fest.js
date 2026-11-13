@@ -65,4 +65,28 @@
     if (reduceMotion.matches) return;
     burst();
   });
+
+  // The rewind starts: sweep away confetti and "Skål!" from the bar being taken back.
+  app.addEventListener('barrunda:rewind', () => {
+    window.clearTimeout(cleanup);
+    if (layer) layer.replaceChildren();
+  });
+
+  // Undo: clear any confetti still flying and pop an "Ångrat" badge with a rewind mark.
+  // Under reduced motion the badge still shows, just without moving.
+  app.addEventListener('barrunda:undo', () => {
+    const coaster = app.querySelector('.coaster');
+    if (!coaster) return;
+    const box = coaster.getBoundingClientRect();
+    const badge = document.createElement('span');
+    badge.className = `rewind${reduceMotion.matches ? ' rewind--still' : ''}`;
+    const icon = document.createElement('span');
+    icon.className = 'rewind__icon';
+    badge.append(icon, 'Ångrat');
+    badge.style.left = `${box.left + box.width / 2}px`;
+    badge.style.top = `${box.top + box.height * 0.12}px`;
+    window.clearTimeout(cleanup);
+    getLayer().replaceChildren(badge);
+    cleanup = window.setTimeout(() => getLayer().replaceChildren(), 1500);
+  });
 })();

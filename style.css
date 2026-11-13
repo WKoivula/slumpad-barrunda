@@ -124,7 +124,9 @@
 /* the roll: the face spins under anonymous letters */
 .is-shuffling .coaster__face { animation: spin 520ms linear infinite; }
 .is-shuffling [data-address],
-.is-shuffling [data-map] { visibility: hidden; }
+.is-shuffling [data-map],
+.is-rewinding [data-address],
+.is-rewinding [data-map] { visibility: hidden; }
 /* the landing: it settles with a wobble */
 .is-landed .coaster__face { animation: settle 640ms var(--ease-out) both; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -132,6 +134,17 @@
   0% { transform: rotate(-24deg) scale(1.04); }
   55% { transform: rotate(6deg); }
   80% { transform: rotate(-2deg); }
+  100% { transform: none; }
+}
+
+/* the rewind (Ångra): twice as fast, the other way round, then a mirrored wobble back onto the old bar */
+.is-rewinding .coaster__face { animation: rewind 260ms linear infinite; }
+.is-rewound .coaster__face { animation: settle-back 560ms var(--ease-out) both; }
+@keyframes rewind { from { transform: scale(0.96); } to { transform: rotate(-360deg) scale(0.96); } }
+@keyframes settle-back {
+  0% { transform: rotate(24deg) scale(0.96); }
+  55% { transform: rotate(-6deg); }
+  80% { transform: rotate(2deg); }
   100% { transform: none; }
 }
 
@@ -177,9 +190,40 @@
   100% { transform: translate(-50%, -110%) scale(1) rotate(-8deg); opacity: 0; }
 }
 
+/* the "Ångrat" badge, with a rewind mark cut from two triangles */
+.rewind {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-party-2);
+  color: var(--color-coaster-ink);
+  font: var(--display-weight) 2.25rem/1 var(--font-display);
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 var(--color-shadow);
+  animation: rewind-pop 1400ms var(--ease-out) forwards;
+}
+.rewind__icon {
+  width: 1em;
+  height: 0.62em;
+  background: currentColor;
+  clip-path: polygon(0 50%, 50% 0, 50% 50%, 100% 0, 100% 100%, 50% 50%, 50% 100%);
+}
+@keyframes rewind-pop {
+  0% { transform: translate(-50%, -50%) scale(0.3) rotate(6deg); opacity: 0; }
+  18% { transform: translate(-50%, -50%) scale(1.12) rotate(6deg); opacity: 1; }
+  30% { transform: translate(-50%, -50%) scale(1) rotate(6deg); opacity: 1; }
+  75% { transform: translate(-50%, -50%) scale(1) rotate(6deg); opacity: 1; }
+  100% { transform: translate(-50%, -90%) scale(1) rotate(6deg); opacity: 0; }
+}
+.rewind--still { animation: none; transform: translate(-50%, -50%) rotate(6deg); }
+
 @media (prefers-reduced-motion: reduce) {
-  .is-shuffling .coaster__face, .is-landed .coaster__face { animation: none; }
-  .confetti { display: none; }
+  .is-shuffling .coaster__face, .is-landed .coaster__face,
+  .is-rewinding .coaster__face, .is-rewound .coaster__face { animation: none; }
+  .confetti__piece, .skal { display: none; }
 }
 
 /* ---------- controls ---------- */
@@ -238,7 +282,8 @@
     radial-gradient(circle at 24px 12px, color-mix(in oklch, var(--color-foam) 55%, transparent) 0 3px, transparent 3.5px) 0 0 / 36px 32px;
 }
 .is-shuffling .btn--primary::after { opacity: 1; animation: bubbles 640ms linear infinite; }
-@keyframes bubbles { to { transform: translateY(-50%); } }
+/* rewinding: the bubbles sink back down */
+.is-rewinding .btn--primary::after { opacity: 1; animation: bubbles 320ms linear infinite reverse; }@keyframes bubbles { to { transform: translateY(-50%); } }
 .btn--primary:focus-visible { outline-color: var(--color-focus); }
 .btn--primary:active:not(:disabled),
 .btn--primary[aria-busy="true"] { transform: translateY(4px); box-shadow: 0 2px 0 var(--color-beer-shadow); background: var(--color-accent-deep); }
@@ -247,26 +292,28 @@
 @media (hover: hover) {
   .btn--secondary:hover:not(:active) { background: var(--color-paper-3); }
   .btn--primary:hover:not(:disabled):not(:active) { transform: translateY(-2px); box-shadow: 0 8px 0 var(--color-beer-shadow); }
-  .reset:hover:not(:disabled) { text-decoration-color: var(--color-accent); }
+  .quiet:hover:not(:disabled) { text-decoration-color: var(--color-accent); }
 }
 
-.reset {
-  justify-self: center;
+/* the two quiet actions under the beer: undo the last pick, reset the round */
+.minor { display: flex; justify-content: center; gap: var(--space-lg); }
+.quiet {
   min-height: 44px;
+  min-width: 44px;
   padding: 0 var(--space-md);
   border: 0;
   background: transparent;
   color: var(--color-ink);
-  font: 400 var(--text-sm)/1 var(--font-body);
+  font: 400 var(--text-md)/1 var(--font-body);
   text-decoration: underline 1px var(--color-muted);
   text-underline-offset: 0.3em;
   cursor: pointer;
 }
-.reset:active:not(:disabled) { color: var(--color-ink-2); }
-.reset:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-.reset:disabled { opacity: 0.55; cursor: not-allowed; }
+.quiet:active:not(:disabled) { color: var(--color-ink-2); }
+.quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.quiet:disabled { opacity: 0.55; cursor: not-allowed; }
 
 @media (prefers-reduced-motion: reduce) {
   .btn { transition: none; }
-  .is-shuffling .btn--primary::after { animation: none; }
+  .is-shuffling .btn--primary::after, .is-rewinding .btn--primary::after { animation: none; }
 }

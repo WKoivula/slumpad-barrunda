@@ -4,6 +4,7 @@
 
   const KEY_VISITED = 'slumpad-barrunda:besokta';
   const KEY_CURRENT = 'slumpad-barrunda:aktuell';
+  const KEY_PREVIOUS = 'slumpad-barrunda:forra'; // the state before the last pick, for "Ångra"
 
   const app = document.querySelector('[data-app]');
   if (!app) return;
@@ -24,12 +25,14 @@
     errorText: $('[data-error-text]'),
     next: $('[data-next]'),
     reset: $('[data-reset]'),
+    undo: $('[data-undo]'),
     retry: $('[data-retry]'),
   };
 
   let bars = [];
   let visited = [];
   let current = null;
+  let previous = null; // { visited, current } before the last pick, or null when there is nothing to undo
   let busy = false;
 
   /* ---------- storage: never throws, works in memory if blocked ---------- */
@@ -56,12 +59,25 @@
     visited = [...new Set(saved.filter((n) => typeof n === 'string' && names.has(n)))];
     const cur = store.read(KEY_CURRENT);
     current = cur && names.has(cur) ? cur : null;
+
+    previous = null;
+    try {
+      const p = JSON.parse(store.read(KEY_PREVIOUS) || 'null');
+      if (p && Array.isArray(p.visited)) {
+        previous = {
+          visited: [...new Set(p.visited.filter((n) => typeof n === 'string' && names.has(n)))],
+          current: typeof p.current === 'string' && names.has(p.current) ? p.current : null,
+        };
+      }
+    } catch { previous = null; }
   }
 
   function saveHistory() {
     store.write(KEY_VISITED, JSON.stringify(visited));
     if (current) store.write(KEY_CURRENT, current);
     else store.remove(KEY_CURRENT);
+    if (previous) store.write(KEY_PREVIOUS, JSON.stringify(previous));
+    else store.remove(KEY_PREVIOUS);
   }
 
   /* ---------- the list ---------- */
@@ -103,6 +119,7 @@
   }
 
   function pickNext() {
+    previous = { visited: visited.slice(), current };
     let pool = bars.filter((b) => !visited.includes(b.namn));
     if (pool.length === 0) {
       // Every bar visited: start a new round silently, but never repeat the bar just shown.
@@ -120,9 +137,10 @@
   function show(state) {
     app.dataset.state = state;
     el.views.forEach((v) => { v.hidden = v.dataset.view !== state; });
-    const ready = state === 'empty' || state === 'full';
+    const ready = (state === 'empty' || state === 'full') && !busy;
     el.next.disabled = !ready;
     el.reset.disabled = !ready || visited.length === 0;
+    if (el.undo) el.undo.disabled = !ready || !previous;
   }
 
   function sizeFor(name) {
@@ -168,7 +186,7 @@
   function land(bar) {
     renderBar(bar);
     el.status.textContent = `Nästa bar: ${bar.namn}${bar.adress ? ', ' + bar.adress : ''}.`;
-    app.classList.remove('is-landed');
+    app.classList.remove('is-landed', 'is-rewound');
     void app.offsetWidth; // restart the landing animation
     app.classList.add('is-landed');
     app.dispatchEvent(new CustomEvent('barrunda:landed', { detail: { namn: bar.namn } }));
@@ -178,7 +196,7 @@
     const steps = [45, 50, 50, 55, 60, 70, 80, 95, 115, 140];
     let i = 0;
     show('full');
-    app.classList.remove('is-landed');
+    app.classList.remove('is-landed', 'is-rewound');
     app.classList.add('is-shuffling');
     app.dispatchEvent(new CustomEvent('barrunda:roll'));
     el.address.hidden = true;
@@ -203,9 +221,52 @@
     if (reduceMotion.matches) { land(bar); return; }
     busy = true;
     el.next.setAttribute('aria-busy', 'true');
-    el.next.disabled = true;
-    el.reset.disabled = true;
     shuffleTo(bar);
+  }
+
+  // Take back the last pick (e.g. an accidental double tap): the bar returns to the unvisited pool.
+  function onUndo() {
+    if (busy || !previous) return;
+    visited = previous.visited;
+    current = previous.current;
+    previous = null;
+    saveHistory();
+    const bar = current && byName(current);
+
+    const finish = () => {
+      busy = false;
+      el.next.removeAttribute('aria-busy');
+      app.classList.remove('is-rewinding', 'is-landed', 'is-rewound');
+      if (bar) {
+        renderBar(bar);
+        el.status.textContent = `Ångrat. Tillbaka till ${bar.namn}.`;
+      } else {
+        renderProgress();
+        show('empty');
+        el.status.textContent = 'Ångrat.';
+      }
+      void app.offsetWidth; // restart the rewind-settle animation
+      app.classList.add('is-rewound');
+      app.dispatchEvent(new CustomEvent('barrunda:undo'));
+    };
+
+    if (reduceMotion.matches) { finish(); return; }
+
+    // A quick rewind: the coaster spins backwards under scrambled letters, then settles on the old bar.
+    busy = true;
+    el.next.setAttribute('aria-busy', 'true');
+    app.classList.remove('is-landed', 'is-rewound');
+    app.classList.add('is-rewinding');
+    app.dispatchEvent(new CustomEvent('barrunda:rewind'));
+    show('full');
+    const steps = [40, 40, 45, 50, 60, 75];
+    let i = 0;
+    const tick = () => {
+      if (i >= steps.length) { finish(); return; }
+      setName(scramble(), 'XXXXXXXXXX');
+      setTimeout(tick, steps[i++]);
+    };
+    tick();
   }
 
   function onReset() {
@@ -213,6 +274,7 @@
     if (!window.confirm('Vill du börja om? Alla besökta barer glöms bort.')) return;
     visited = [];
     current = null;
+    previous = null;
     saveHistory();
     renderProgress();
     el.status.textContent = 'Historiken är rensad.';
@@ -248,6 +310,7 @@
 
   el.next.addEventListener('click', onNext);
   el.reset.addEventListener('click', onReset);
+  if (el.undo) el.undo.addEventListener('click', onUndo);
   if (el.retry) el.retry.addEventListener('click', load);
 
   load();

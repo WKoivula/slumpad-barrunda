@@ -6,6 +6,14 @@
 - A bar is **never repeated until every bar has been visited**. After that, the history resets silently and randomizing carries on. The bar just shown is excluded from the first pick after the reset, so it can't come up twice in a row.
 - Each phone randomizes **independently**. There is no server, no sync and no shared state between users.
 - A small **"Börja om"** button clears the history, after a confirmation dialog.
+- A small **"Ångra"** button takes back the last pick, for an accidental double tap. It restores the previous bar and visited list, and the undone bar goes back into the unvisited pool.
+  - It's one step only, disabled until the next pick, and disabled during the roll.
+  - It survives a reload, and it works across the silent new-round reset.
+  - **Rewind effect:** about 0.35s with the `is-rewinding` class.
+    - The coaster spins backwards, twice as fast as the roll, under scrambled letters, and the beer bubbles sink.
+    - It then settles on the old bar with a mirrored wobble (`is-rewound`). `fest.js` pops a mint **"◀◀ Ångrat"** badge; the ◀◀ is a CSS clip-path, not an emoji.
+    - `app.js` fires `barrunda:rewind` at the start, which clears leftover confetti, and `barrunda:undo` at the end.
+    - Under reduced motion there's no spin, and the badge shows still for 1.5s.
 
 ## Hard requirements
 - **Static only**: plain HTML, CSS and JS. No build step, no framework, no npm dependencies at runtime.
@@ -32,6 +40,7 @@
 ## Storage keys
 - `slumpad-barrunda:besokta`: a JSON array of visited bar names for the current round.
 - `slumpad-barrunda:aktuell`: the name of the bar currently shown, so a reload keeps it on screen.
+- `slumpad-barrunda:forra`: `{ visited, current }` from just before the last pick, used by "Ångra". It's removed after an undo or a reset.
 
 ## Screen states
 - Every state must exist and stay in Swedish:
