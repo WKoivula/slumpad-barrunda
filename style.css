@@ -1,0 +1,179 @@
+/* Hallmark · shape: app screen · genre: atmospheric · theme: Darkroom (by request, deal 2/3, seed mobile-bar-crawl-randomizer-1cac·a2de116c·2026-11-13·r0)
+ * nav: top bar, wordmark and the visited count · signature: a cream beer coaster on a Campari-red table that spins while the roll runs and settles on the bar · states: loading, empty, error, full · darkroom: custom colourway "aperitivo" (red ground, cream coaster, oxblood ink, butter-yellow signal; heavy 800 capitals instead of the hairline, because the user asked for a more fun feel)
+ * axes: mid/display-condensed/chromatic-yellow · posture: full-palette · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R4 V5 · weakest: R, red ground plus yellow button plus cream coaster is three loud surfaces; kept the coaster the only object with type on it and the yellow to the one button */
+/* Hallmark · dismissed 40 · the coaster is oxblood 28% on cream 94% after the colourway block overrides tokens.css; the static pass read the dark Darkroom paper-2 */
+/* Hallmark · waive 39b · one 64px button, the only action on this screen · pressed one-handed in a dark bar, so the next-bar button gets the thumb-sized target */
+@import url("./tokens.css");
+@import url("./base.css");
+
+/* colourway: aperitivo */
+:root {
+  --color-paper: oklch(45% 0.16 30); --color-paper-2: oklch(94% 0.04 88); --color-paper-3: oklch(87% 0.05 85);
+  --color-ink: oklch(97% 0.025 90); --color-ink-2: oklch(92% 0.035 85); --color-muted: oklch(88% 0.05 65);
+  --color-rule: oklch(56% 0.15 30);
+  --color-coaster-ink: oklch(28% 0.09 25); --color-coaster-muted: oklch(44% 0.09 28); --color-coaster-ring: oklch(62% 0.14 30);
+  --color-shadow: oklch(33% 0.12 28);
+  --color-accent: oklch(88% 0.16 95); --color-accent-deep: oklch(80% 0.16 88); --color-accent-ink: oklch(28% 0.09 25);
+  --color-focus: oklch(93% 0.12 100);
+  --display-weight: 800; --tracking-display: 0;
+}
+
+/* ---------- shell ---------- */
+.app {
+  min-height: 100dvh;
+  max-width: 30rem;
+  margin-inline: auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding:
+    max(var(--space-md), env(safe-area-inset-top))
+    max(var(--space-md), env(safe-area-inset-right))
+    max(var(--space-md), env(safe-area-inset-bottom))
+    max(var(--space-md), env(safe-area-inset-left));
+}
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+.wordmark { font: var(--display-weight) var(--text-xl)/1 var(--font-display); text-transform: uppercase; }
+.progress { font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.stage { display: grid; align-content: center; justify-items: center; padding-block: var(--space-xl); }
+
+/* ---------- the coaster ---------- */
+.coaster {
+  container-type: inline-size;
+  width: min(100%, 23rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-paper-2);
+  color: var(--color-coaster-ink);
+  box-shadow: 0 10px 0 var(--color-shadow);
+}
+.grained { position: relative; isolation: isolate; }
+.grained::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.1;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 9 -4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 200px 200px;
+}
+/* the face carries the printed ring and the type, and is what turns */
+.coaster__face {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 15cqi;
+  text-align: center;
+  box-shadow:
+    inset 0 0 0 5cqi var(--color-paper-2),
+    inset 0 0 0 calc(5cqi + 2px) var(--color-coaster-ring);
+}
+.coaster__view { display: grid; gap: var(--space-sm); justify-items: center; }
+
+.coaster__name,
+.coaster__title {
+  max-width: none;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  text-transform: uppercase;
+  line-height: 1;
+  hyphens: auto;
+  text-wrap: balance;
+}
+.coaster__name { font-size: min(18cqi, 5rem); }
+.coaster__name[data-size="m"] { font-size: min(14cqi, 4rem); }
+.coaster__name[data-size="s"] { font-size: min(10cqi, 2.75rem); overflow-wrap: anywhere; }
+.coaster__title { font-size: min(12cqi, 3.25rem); }
+.coaster__text { font-size: var(--text-md); line-height: 1.45; color: var(--color-coaster-muted); max-width: 28ch; }
+
+/* the roll: the face spins under anonymous letters */
+.is-shuffling .coaster__face { animation: spin 520ms linear infinite; }
+.is-shuffling [data-address],
+.is-shuffling [data-map] { visibility: hidden; }
+/* the landing: it settles with a wobble */
+.is-landed .coaster__face { animation: settle 640ms var(--ease-out) both; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes settle {
+  0% { transform: rotate(-24deg); }
+  55% { transform: rotate(6deg); }
+  80% { transform: rotate(-2deg); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-shuffling .coaster__face, .is-landed .coaster__face { animation: none; }
+}
+
+.skeleton { display: block; width: 60cqi; height: 1rem; background: var(--color-paper-3); }
+.skeleton--title { height: 3rem; }
+.skeleton--line { width: 40cqi; }
+
+/* ---------- controls ---------- */
+.actions { display: grid; gap: var(--space-xs); padding-bottom: var(--space-2xs); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border: 2px solid currentColor;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-coaster-ink);
+  font: var(--display-weight) var(--text-lg)/1 var(--font-display);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:focus-visible { outline: 3px solid var(--color-coaster-ink); outline-offset: 3px; transition: none; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn[aria-busy="true"] { cursor: progress; opacity: 1; }
+.btn--secondary:active { background: var(--color-paper-3); }
+
+.btn--primary {
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  box-shadow: 0 6px 0 var(--color-shadow);
+}
+.btn--primary:focus-visible { outline-color: var(--color-focus); }
+.btn--primary:active:not(:disabled),
+.btn--primary[aria-busy="true"] { transform: translateY(4px); box-shadow: 0 2px 0 var(--color-shadow); background: var(--color-accent-deep); }
+.btn--next { min-height: 64px; font-size: var(--text-2xl); }
+
+@media (hover: hover) {
+  .btn--secondary:hover:not(:active) { background: var(--color-paper-3); }
+  .btn--primary:hover:not(:disabled):not(:active) { transform: translateY(-2px); box-shadow: 0 8px 0 var(--color-shadow); }
+  .reset:hover:not(:disabled) { text-decoration-color: var(--color-accent); }
+}
+
+.reset {
+  justify-self: center;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: 400 var(--text-sm)/1 var(--font-body);
+  text-decoration: underline 1px var(--color-muted);
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+}
+.reset:active:not(:disabled) { color: var(--color-ink-2); }
+.reset:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.reset:disabled { opacity: 0.55; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }

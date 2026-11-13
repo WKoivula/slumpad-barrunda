@@ -1,0 +1,28 @@
+[
+ {
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "darkroom",
+  "colourway": "aperitivo (custom, by request)",
+  "axes": "mid/display-condensed/chromatic-yellow",
+  "hero": "none (app screen): one centred coaster object",
+  "nav": "top bar, wordmark and visited count",
+  "footer": "thumb-zone primary button and a quiet reset",
+  "imagery": "none, type on a coaster",
+  "photos": [],
+  "entry": "empty state on the coaster",
+  "fingerprint": "app/centred-object/top-bar/thumb-footer/no-photo/coaster",
+  "sections": [
+   "top bar",
+   "coaster (loading, empty, full, error)",
+   "actions"
+  ],
+  "signature": "a cream beer coaster on a Campari-red table that spins under anonymous letters and settles on the bar",
+  "waived": [
+   "39b"
+  ],
+  "prompt": "mobile bar crawl randomizer, swedish, night out with friends, one big button to the next bar",
+  "date": "2026-11-13",
+  "mode": "build"
+ }
+]

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Slumpad barrunda</title>
+  <meta name="description" content="Tryck på knappen och få en slumpad bar. Ingen bar upprepas förrän du varit på alla.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Extra+Condensed:wght@400;800&family=Barlow:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <noscript><style>[data-view="loading"], .actions { display: none; }</style></noscript>
+</head>
+<body>
+  <div class="app" data-app data-barer="barer.json" data-state="loading">
+    <header class="top">
+      <p class="wordmark">Slumpad barrunda</p>
+      <p class="progress" data-progress></p>
+    </header>
+
+    <main class="stage" id="main">
+      <div class="coaster grained">
+        <div class="coaster__face">
+          <noscript>
+            <h1 class="coaster__title">Slå på JavaScript</h1>
+            <p class="coaster__text">Sidan behöver JavaScript för att kunna slumpa barer.</p>
+          </noscript>
+
+          <div class="coaster__view" data-view="loading" aria-hidden="true">
+            <span class="skeleton skeleton--title"></span>
+            <span class="skeleton skeleton--line"></span>
+          </div>
+
+          <div class="coaster__view" data-view="empty" hidden>
+            <h1 class="coaster__title">Var börjar kvällen?</h1>
+            <p class="coaster__text">Tryck på knappen så slumpas första baren.</p>
+          </div>
+
+          <article class="coaster__view" data-view="full" hidden>
+            <h1 class="coaster__name" data-name></h1>
+            <p class="coaster__text" data-address></p>
+            <a class="btn btn--secondary" data-map href="#" target="_blank" rel="noopener">Visa på karta</a>
+          </article>
+
+          <div class="coaster__view" data-view="error" hidden>
+            <h1 class="coaster__title" data-error-title>Barlistan gick inte att läsa</h1>
+            <p class="coaster__text" data-error-text>Kolla att du har uppkoppling och försök igen.</p>
+            <button class="btn btn--secondary" type="button" data-retry>Försök igen</button>
+          </div>
+        </div>
+      </div>
+      <p class="visually-hidden" aria-live="polite" data-status></p>
+    </main>
+
+    <footer class="actions">
+      <button class="btn btn--primary btn--next" type="button" data-next disabled>Till nästa bar</button>
+      <button class="reset" type="button" data-reset disabled>Börja om</button>
+    </footer>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>
