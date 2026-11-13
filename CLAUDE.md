@@ -41,8 +41,14 @@
   - **Full:** the current bar.
 - The shuffle animation uses only `transform` and `opacity`. Under `prefers-reduced-motion: reduce` the pick appears instantly.
 
-## The chosen design: "Aperitivo"
-- Hallmark's **Darkroom** theme with a custom colourway: a Campari-red ground, a cream beer coaster in the centre with dark-red type, and a butter-yellow primary button.
+## The chosen design: "Aperitivo", party version ("fest")
+- Hallmark's **Darkroom** theme with a custom party colourway:
+  - A raspberry ground, with still confetti dots behind the coaster area only, never behind text.
+  - A cream beer coaster in the centre with berry type and a dashed hot-pink ring.
+  - Five confetti colours: the `--color-party-*` tokens.
+- The primary button is a **beer**: an amber body, a scalloped foam head (`::before`), and bubbles that rise inside it while rolling (`::after`).
+- **`fest.js`** holds the party effects. It listens for the `barrunda:landed` event from `app.js` and throws a confetti burst plus a "Skål!" that pops and fades. It's pure decoration: aria-hidden, cleaned up after 1.6s, and off under reduced motion. `app.js` also fires `barrunda:roll` when a roll starts.
+- Keep confetti colours away from cyan on the dark ground: sloplint fails it as a "cyan-on-dark gradient" (gate 2a).
 - Faces: Sofia Sans Extra Condensed at 800 (headings, wordmark, buttons) and Barlow at 400 (body). No other weights.
 - The colourway lives in the `:root` block at the top of `style.css` and **overrides** `tokens.css`. Change colours there, never in `tokens.css`.
 - The roll is **anonymous**: while it runs, the coaster spins under 6 to 10 random letters (`scramble()` in `app.js`). Never show real bar names during the roll.

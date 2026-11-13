@@ -1,22 +1,40 @@
 /* Hallmark · shape: app screen · genre: atmospheric · theme: Darkroom (by request, deal 2/3, seed mobile-bar-crawl-randomizer-1cac·a2de116c·2026-11-13·r0)
- * nav: top bar, wordmark and the visited count · signature: a cream beer coaster on a Campari-red table that spins while the roll runs and settles on the bar · states: loading, empty, error, full · darkroom: custom colourway "aperitivo" (red ground, cream coaster, oxblood ink, butter-yellow signal; heavy 800 capitals instead of the hairline, because the user asked for a more fun feel)
- * axes: mid/display-condensed/chromatic-yellow · posture: full-palette · contrast: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H5 E4 S5 R4 V5 · weakest: R, red ground plus yellow button plus cream coaster is three loud surfaces; kept the coaster the only object with type on it and the yellow to the one button */
-/* Hallmark · dismissed 40 · the coaster is oxblood 28% on cream 94% after the colourway block overrides tokens.css; the static pass read the dark Darkroom paper-2 */
+ * nav: top bar, wordmark and the visited count · signature: a cream beer coaster on a confetti-strewn raspberry table that spins under anonymous letters, settles on the bar and throws confetti with a "Skål!"; the next-bar button is a foam-topped beer that bubbles while it rolls · states: loading, empty, error, full · darkroom: custom colourway "fest" (raspberry ground, cream coaster, berry ink, beer-amber button, five confetti inks; the user asked for party colours, a beer theme and party effects)
+ * axes: mid/display-condensed/chromatic-amber · posture: full-palette · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R3 V5 · weakest: R, the user asked for a party, so restraint is spent on purpose; the confetti lives only in the background dots and the one-second burst, and the coaster keeps all the type */
+/* Hallmark · dismissed 40 · the coaster is berry 27% on cream 95% after the colourway block overrides tokens.css; the static pass read the dark Darkroom paper-2 */
 /* Hallmark · waive 39b · one 64px button, the only action on this screen · pressed one-handed in a dark bar, so the next-bar button gets the thumb-sized target */
 @import url("./tokens.css");
 @import url("./base.css");
 
-/* colourway: aperitivo */
+/* colourway: fest */
 :root {
-  --color-paper: oklch(45% 0.16 30); --color-paper-2: oklch(94% 0.04 88); --color-paper-3: oklch(87% 0.05 85);
-  --color-ink: oklch(97% 0.025 90); --color-ink-2: oklch(92% 0.035 85); --color-muted: oklch(88% 0.05 65);
-  --color-rule: oklch(56% 0.15 30);
-  --color-coaster-ink: oklch(28% 0.09 25); --color-coaster-muted: oklch(44% 0.09 28); --color-coaster-ring: oklch(62% 0.14 30);
-  --color-shadow: oklch(33% 0.12 28);
-  --color-accent: oklch(88% 0.16 95); --color-accent-deep: oklch(80% 0.16 88); --color-accent-ink: oklch(28% 0.09 25);
-  --color-focus: oklch(93% 0.12 100);
+  color-scheme: dark;
+  --color-paper: oklch(38% 0.17 355); --color-paper-2: oklch(95% 0.035 88); --color-paper-3: oklch(88% 0.045 85);
+  --color-ink: oklch(97% 0.025 90); --color-ink-2: oklch(92% 0.035 85); --color-muted: oklch(88% 0.06 350);
+  --color-rule: oklch(52% 0.17 355);
+  --color-coaster-ink: oklch(27% 0.1 355); --color-coaster-muted: oklch(42% 0.11 355); --color-coaster-ring: oklch(62% 0.21 355);
+  --color-shadow: oklch(25% 0.12 355);
+  --color-accent: oklch(78% 0.16 72); --color-accent-deep: oklch(71% 0.16 64); --color-accent-ink: oklch(27% 0.07 50);
+  --color-foam: oklch(97% 0.02 90); --color-beer-shadow: oklch(42% 0.11 52);
+  --color-focus: oklch(90% 0.16 100);
+  --color-party-1: oklch(88% 0.17 95); --color-party-2: oklch(86% 0.15 155); --color-party-3: oklch(74% 0.18 48);
+  --color-party-4: oklch(87% 0.19 135); --color-party-5: oklch(86% 0.09 350);
   --display-weight: 800; --tracking-display: 0;
+}
+
+/* the table: raspberry, strewn with confetti dots that stay still, kept clear of the text rows */
+.stage {
+  background-image:
+    radial-gradient(circle at 12% 18%, color-mix(in oklch, var(--color-party-1) 70%, transparent) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 68% 9%, color-mix(in oklch, var(--color-party-2) 70%, transparent) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 88% 58%, color-mix(in oklch, var(--color-party-3) 70%, transparent) 0 3.5px, transparent 4px),
+    radial-gradient(circle at 34% 76%, color-mix(in oklch, var(--color-party-4) 70%, transparent) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 52% 44%, color-mix(in oklch, var(--color-party-5) 70%, transparent) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 30% 40%, color-mix(in oklch, var(--color-party-3) 60%, transparent) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 80% 85%, color-mix(in oklch, var(--color-party-1) 60%, transparent) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 60% 20%, color-mix(in oklch, var(--color-party-4) 60%, transparent) 0 2px, transparent 2.5px);
+  background-size: 190px 210px, 190px 210px, 190px 210px, 190px 210px, 190px 210px, 250px 170px, 250px 170px, 250px 170px;
 }
 
 /* ---------- shell ---------- */
@@ -66,8 +84,9 @@
   opacity: 0.1;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 9 -4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 200px 200px;
 }
-/* the face carries the printed ring and the type, and is what turns */
+/* the face carries the dashed printed ring and the type, and is what turns */
 .coaster__face {
+  position: relative;
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -75,9 +94,14 @@
   place-items: center;
   padding: 15cqi;
   text-align: center;
-  box-shadow:
-    inset 0 0 0 5cqi var(--color-paper-2),
-    inset 0 0 0 calc(5cqi + 2px) var(--color-coaster-ring);
+}
+.coaster__face::before {
+  content: "";
+  position: absolute;
+  inset: 5cqi;
+  border-radius: 50%;
+  border: 3px dashed var(--color-coaster-ring);
+  pointer-events: none;
 }
 .coaster__view { display: grid; gap: var(--space-sm); justify-items: center; }
 
@@ -105,18 +129,58 @@
 .is-landed .coaster__face { animation: settle 640ms var(--ease-out) both; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes settle {
-  0% { transform: rotate(-24deg); }
+  0% { transform: rotate(-24deg) scale(1.04); }
   55% { transform: rotate(6deg); }
   80% { transform: rotate(-2deg); }
   100% { transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .is-shuffling .coaster__face, .is-landed .coaster__face { animation: none; }
 }
 
 .skeleton { display: block; width: 60cqi; height: 1rem; background: var(--color-paper-3); }
 .skeleton--title { height: 3rem; }
 .skeleton--line { width: 40cqi; }
+
+/* ---------- party effects (fest.js) ---------- */
+.confetti { position: fixed; inset: 0; z-index: var(--z-toast); pointer-events: none; overflow: clip; }
+.confetti__piece {
+  position: absolute;
+  width: 8px;
+  height: 14px;
+  translate: -50% -50%;
+  animation: burst var(--d, 1200ms) cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+}
+.confetti__piece--dot { width: 10px; height: 10px; border-radius: 50%; }
+.confetti__piece--c1 { background: var(--color-party-1); }
+.confetti__piece--c2 { background: var(--color-party-2); }
+.confetti__piece--c3 { background: var(--color-party-3); }
+.confetti__piece--c4 { background: var(--color-party-4); }
+.confetti__piece--c5 { background: var(--color-party-5); }
+@keyframes burst {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.4); opacity: 1; }
+  45% { transform: translate(var(--x), var(--y1)) rotate(calc(var(--r) * 0.5)) scale(1); opacity: 1; }
+  100% { transform: translate(calc(var(--x) * 1.15), var(--y2)) rotate(var(--r)) scale(1); opacity: 0; }
+}
+
+.skal {
+  position: absolute;
+  font: var(--display-weight) 4rem/1 var(--font-display);
+  text-transform: uppercase;
+  color: var(--color-party-1);
+  text-shadow: 0 4px 0 var(--color-shadow);
+  white-space: nowrap;
+  animation: skal 1400ms var(--ease-out) forwards;
+}
+@keyframes skal {
+  0% { transform: translate(-50%, -50%) scale(0.3) rotate(-8deg); opacity: 0; }
+  18% { transform: translate(-50%, -50%) scale(1.15) rotate(-8deg); opacity: 1; }
+  32% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
+  75% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
+  100% { transform: translate(-50%, -110%) scale(1) rotate(-8deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-shuffling .coaster__face, .is-landed .coaster__face { animation: none; }
+  .confetti { display: none; }
+}
 
 /* ---------- controls ---------- */
 .actions { display: grid; gap: var(--space-xs); padding-bottom: var(--space-2xs); }
@@ -143,20 +207,46 @@
 .btn[aria-busy="true"] { cursor: progress; opacity: 1; }
 .btn--secondary:active { background: var(--color-paper-3); }
 
+/* the beer: amber body, a scalloped foam head, bubbles that rise while it rolls */
 .btn--primary {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
   border: 0;
   background: var(--color-accent);
   color: var(--color-accent-ink);
-  box-shadow: 0 6px 0 var(--color-shadow);
+  box-shadow: 0 6px 0 var(--color-beer-shadow);
 }
+.btn--primary::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 16px;
+  background:
+    radial-gradient(circle at 8px 9px, var(--color-foam) 0 7px, transparent 7.5px) 0 0 / 16px 16px repeat-x,
+    linear-gradient(var(--color-foam) 0 0) 0 0 / 100% 8px no-repeat;
+}
+.btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 -100%;
+  z-index: -2;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 6px 26px, color-mix(in oklch, var(--color-foam) 70%, transparent) 0 2px, transparent 2.5px) 0 0 / 36px 32px,
+    radial-gradient(circle at 24px 12px, color-mix(in oklch, var(--color-foam) 55%, transparent) 0 3px, transparent 3.5px) 0 0 / 36px 32px;
+}
+.is-shuffling .btn--primary::after { opacity: 1; animation: bubbles 640ms linear infinite; }
+@keyframes bubbles { to { transform: translateY(-50%); } }
 .btn--primary:focus-visible { outline-color: var(--color-focus); }
 .btn--primary:active:not(:disabled),
-.btn--primary[aria-busy="true"] { transform: translateY(4px); box-shadow: 0 2px 0 var(--color-shadow); background: var(--color-accent-deep); }
-.btn--next { min-height: 64px; font-size: var(--text-2xl); }
+.btn--primary[aria-busy="true"] { transform: translateY(4px); box-shadow: 0 2px 0 var(--color-beer-shadow); background: var(--color-accent-deep); }
+.btn--next { min-height: 64px; padding-top: var(--space-xs); font-size: var(--text-2xl); }
 
 @media (hover: hover) {
   .btn--secondary:hover:not(:active) { background: var(--color-paper-3); }
-  .btn--primary:hover:not(:disabled):not(:active) { transform: translateY(-2px); box-shadow: 0 8px 0 var(--color-shadow); }
+  .btn--primary:hover:not(:disabled):not(:active) { transform: translateY(-2px); box-shadow: 0 8px 0 var(--color-beer-shadow); }
   .reset:hover:not(:disabled) { text-decoration-color: var(--color-accent); }
 }
 
@@ -176,4 +266,7 @@
 .reset:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .reset:disabled { opacity: 0.55; cursor: not-allowed; }
 
-@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+  .is-shuffling .btn--primary::after { animation: none; }
+}

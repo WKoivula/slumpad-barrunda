@@ -171,6 +171,7 @@
     app.classList.remove('is-landed');
     void app.offsetWidth; // restart the landing animation
     app.classList.add('is-landed');
+    app.dispatchEvent(new CustomEvent('barrunda:landed', { detail: { namn: bar.namn } }));
   }
 
   function shuffleTo(bar) {
@@ -179,6 +180,7 @@
     show('full');
     app.classList.remove('is-landed');
     app.classList.add('is-shuffling');
+    app.dispatchEvent(new CustomEvent('barrunda:roll'));
     el.address.hidden = true;
     const tick = () => {
       if (i >= steps.length) {
