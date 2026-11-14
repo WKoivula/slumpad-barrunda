@@ -34,6 +34,7 @@
   };
 
   let bars = [];
+  let roundLen = 0; // stops per round ("antal" in barer.json, last bar included); defaults to every bar
   let visited = [];
   let current = null;
   let history = []; // { visited, current } before each pick, newest last; "Ångra" pops one
@@ -96,6 +97,16 @@
   }
 
   /* ---------- the list ---------- */
+  // barer.json is either a plain array of bars, or { "antal": 4, "barer": [...] } for a fixed round length.
+  function parseList(data) {
+    const list = Array.isArray(data) ? data : data && Array.isArray(data.barer) ? data.barer : [];
+    bars = parseBars(list);
+    const antal = data && !Array.isArray(data) ? Number(data.antal) : NaN;
+    roundLen = Number.isInteger(antal) && antal > 0 ? Math.min(antal, bars.length) : bars.length;
+    // With a last bar, the round must have room for it plus at least one other stop when there are others.
+    if (bars.some((b) => b.sist) && bars.length > 1) roundLen = Math.max(roundLen, 2);
+  }
+
   function parseBars(data) {
     if (!Array.isArray(data)) return [];
     const seen = new Set();
@@ -140,15 +151,25 @@
   function pickNext() {
     history.push({ visited: visited.slice(), current });
     if (history.length > MAX_HISTORY) history.shift();
-    let pool = bars.filter((b) => !visited.includes(b.namn));
-    if (pool.length === 0) {
-      // Every bar visited: start a new round silently, but never repeat the bar just shown.
+    const final = bars.find((b) => b.sist) || null;
+    const roundOver = visited.length >= roundLen || (final && visited.includes(final.namn));
+    let pool;
+    if (roundOver) {
+      // Round complete: start a new one silently, but never repeat the bar just shown.
       visited = [];
-      pool = bars.length > 1 ? bars.filter((b) => b.namn !== current) : bars.slice();
+      pool = bars.filter((b) => b.namn !== current);
+      if (!pool.length) pool = bars.slice();
+    } else {
+      pool = bars.filter((b) => !visited.includes(b.namn));
     }
-    // The bar marked "sist" waits until every other bar of the round is visited, so the night ends there for everyone.
-    const others = pool.filter((b) => !b.sist);
-    if (others.length) pool = others;
+    // The bar marked "sist" is always the round's last stop, so the night ends there for everyone.
+    // The other stops are drawn from the rest of the list (the pool), as many as "antal" leaves room for.
+    if (final && visited.length === roundLen - 1) {
+      pool = [final];
+    } else {
+      const others = pool.filter((b) => !b.sist);
+      if (others.length) pool = others;
+    }
     // After an undo, rolls replay the bars that were taken back, in order, so undoing can't be used to shop for a bar.
     let bar = null;
     while (!bar && queue.length) {
@@ -194,7 +215,7 @@
   }
 
   function renderProgress() {
-    const n = bars.length;
+    const n = roundLen;
     if (el.progress) el.progress.textContent = n ? `${visited.length} av ${n} besökta` : '';
     const pos = current ? visited.indexOf(current) + 1 : 0;
     const stop = String(pos || visited.length);
@@ -323,7 +344,7 @@
     try {
       const res = await fetch(source, { cache: 'no-cache' });
       if (!res.ok) throw new Error(String(res.status));
-      bars = parseBars(await res.json());
+      parseList(await res.json());
     } catch {
       fail('Barlistan gick inte att läsa', 'Kolla att du har uppkoppling och försök igen.');
       return;

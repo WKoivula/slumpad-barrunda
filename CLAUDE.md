@@ -3,10 +3,14 @@
 ## What it is
 - A static website for a bar crawl. About 20 people use it at the same time, each on their own phone.
 - Each person has a **"Till nästa bar"** button. Pressing it picks a random bar from the list and shows its name, its address and a **"Visa på karta"** link (Google Maps).
-- A bar is **never repeated until every bar has been visited**. After that, the history resets silently and randomizing carries on. The bar just shown is excluded from the first pick after the reset, so it can't come up twice in a row.
+- **Rounds of a fixed length.** `"antal"` in `barer.json` sets how many bars a round has, the last bar included.
+  - The first `antal − 1` stops are drawn at random from the **pool**: every bar not marked `sist`. The pool can be bigger than that, so different phones get different bars.
+  - The last stop is always the bar marked `"sist": true`.
+  - A bar is **never repeated within a round**. After the round, the history resets silently and randomizing carries on. The bar just shown is excluded from the first pick after the reset, so it can't come up twice in a row.
+  - Without `antal` (or with a plain array), a round is every bar in the list.
 - Each phone randomizes **independently**. There is no server, no sync and no shared state between users.
 - A small **"Börja om"** button clears the history, after a confirmation dialog.
-- **A shared last bar.** The bar marked `"sist": true` in `barer.json` is held back until every other bar of the round has been visited, so everyone's crawl ends there.
+- **A shared last bar.** The bar marked `"sist": true` in `barer.json` is always the last stop of the round, so everyone's crawl ends there.
   - When it comes up, the coaster shows a "Kvällens sista bar!" tag.
   - After it, the silent new round starts as usual, and the marked bar is again held back until the end.
 - A small **"Ångra"** button takes back picks, for accidental taps. It's **multi-step**: each press undoes one more pick, all the way back to the start of the night ("Var börjar kvällen?").
@@ -39,7 +43,10 @@
 - `.hallmark/log.json`: the Hallmark build log. `.hallmark/shots/` holds sloplint screenshots and is git-ignored.
 
 ## The bar list (`barer.json`)
-- A JSON array. Each entry is `{ "namn": "Barens namn", "adress": "Gatan 1, Stad" }`.
+- A JSON object: `{ "antal": 4, "barer": [ ... ] }`.
+  - `antal` is the round length, including the last bar. It's capped at the number of bars. With `antal: 4`, five bars and one marked `sist`, everyone gets 3 of the other 4, then the last bar.
+  - A plain array of bars also works. The round is then every bar.
+- Each entry in `barer` is `{ "namn": "Barens namn", "adress": "Gatan 1, Stad" }`.
 - Optional `"karta": "https://..."` overrides the generated Google Maps link (use it when a name search finds the wrong place).
 - Optional `"sist": true` marks **the shared last bar** of the night. Only the first bar marked counts. Remove the field (or set it to `false`) if the crawl should have no fixed ending.
 - `namn` is required and must be **unique**: it's the key stored in each visitor's history. Renaming a bar makes it count as a new, unvisited bar. Removed bars are ignored in old histories.
@@ -47,7 +54,7 @@
 - Keep the JSON valid: double quotes, commas between entries, no trailing comma. If the file fails to parse, the site shows its error state.
 
 ## Storage keys
-- `slumpad-barrunda:besokta`: a JSON array of visited bar names for the current round.
+- `slumpad-barrunda:besokta`: a JSON array of visited bar names for the current round. The header shows "N av antal besökta".
 - `slumpad-barrunda:aktuell`: the name of the bar currently shown, so a reload keeps it on screen.
 - `slumpad-barrunda:historik`: a stack of `{ visited, current }`, one entry from just before each pick, newest last, capped at 200. "Ångra" pops from it; "Börja om" clears it.
 - `slumpad-barrunda:ko`: the replay queue, a JSON array of bar names that undos took back, next first. Each roll takes from its front.
@@ -86,5 +93,5 @@
   - The `--render` tier needs `puppeteer-core`, found through `HALLMARK_PUPPETEER=<folder with node_modules>`. On this machine there's no Chrome, so also set `CHROME_PATH` to Edge (`C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`).
 
 ## Run locally
-- `npx serve .` or `python -m http.server 8000`, then open `http://localhost:8000`. Opening `index.html` straight from disk (`file://`) blocks the `fetch` of `barer.json`.
+- `npm start` (serves on `http://localhost:5173`; `package.json` has only scripts, no dependencies), or `npx serve .` or `python -m http.server 8000`. The python server uses `http://localhost:8000`. Opening `index.html` straight from disk (`file://`) blocks the `fetch` of `barer.json`.
 - To test on a phone, use the same Wi-Fi and open `http://<computer-ip>:8000`.

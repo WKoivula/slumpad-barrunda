@@ -1,0 +1,9 @@
+{
+  "name": "slumpad-barrunda",
+  "private": true,
+  "description": "Slumpad barrunda: statisk sajt för GitHub Pages. Inga beroenden, scripten startar bara en lokal server.",
+  "scripts": {
+    "start": "npx --yes serve -l 5173 .",
+    "dev": "npx --yes serve -l 5173 ."
+  }
+}

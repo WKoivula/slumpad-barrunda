@@ -1,8 +1,10 @@
-[
-  { "namn": "Exempelbar 1", "adress": "Exempelgatan 1, Stockholm" },
-  { "namn": "Exempelbar 2", "adress": "Exempelgatan 2, Stockholm" },
-  { "namn": "Exempelbar 3", "adress": "Exempelgatan 3, Stockholm" },
-  { "namn": "Exempelbar 4", "adress": "Exempelgatan 4, Stockholm" },
-  { "namn": "Exempelbar med ett längre namn", "adress": "Exempelgatan 5, Stockholm" },
-  { "namn": "Exempelbar 6", "adress": "Exempelgatan 6, Stockholm", "sist": true }
-]
+{
+  "antal": 4,
+  "barer": [
+    { "namn": "Balthazar", "adress": "Högbergsgatan 33, 116 20 Stockholm", "karta": "https://maps.app.goo.gl/PhWAZVGfZjCx41yZ7" },
+    { "namn": "Baras Gemenskap", "adress": "Sankt Paulsgatan 2, 118 46 Stockholm", "karta": "https://maps.app.goo.gl/dBG8DxnsnLYReWco8" },
+    { "namn": "Carmen", "adress": "Tjärhovsgatan 14, 116 21 Stockholm", "karta": "https://maps.app.goo.gl/CD8VfysKWK5ptYWx7" },
+    { "namn": "ZAZHA", "adress": "Medborgarplatsen 3, 118 26 Stockholm", "karta": "https://maps.app.goo.gl/Rcudch3ek361BSxMA" },
+    { "namn": "Parken Söder", "adress": "Exempelgatan 5, Stockholm", "sist": true }
+  ]
+}
